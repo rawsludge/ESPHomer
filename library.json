@@ -1,0 +1,45 @@
+{
+    "name": "ESPHomer",
+    "keywords": "iot, home, automation, mqtt, esp8266, async, sensor, Home Assistant",
+    "description": "ESP8266 framework for Home Assistant, a lightweight MQTT convention for the IoT",
+    "homepage": "https://github.com/rawsludge/ESPHomer",
+    "license": "MIT",
+    "authors": [
+        {
+          "name": "Ahmet ÖZTÜRK",
+          "e-mail": "rawsludge@hotmail.com",
+          "maintainer": true
+        }
+    ],
+    "repository":
+    {
+      "type": "git",
+      "url": "https://github.com/rawsludge/ESPHomer.git"
+    },
+    "frameworks": "arduino",
+    "platforms": [
+      "espressif8266"
+    ],    
+    "dependencies": [
+        {
+          "name": "ArduinoJson",
+          "version": "^6.16.1"
+        },
+        {
+            "name": "ArduinoLog",
+            "version": "^1.0.3"
+        },
+        {
+            "name": "AutoConnect",
+            "version": "^1.1.7"
+        }
+    ],
+    "export": {
+        "include": [
+          "LICENSE",
+          "keywords.txt",
+          "src/*",
+          "examples/*"
+        ]
+      }        
+}
