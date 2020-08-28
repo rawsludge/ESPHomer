@@ -1,4 +1,5 @@
 #pragma once
+#include <Arduino.h>
 #include <LittleFS.h>
 #include <ArduinoLog.h>
 #include "IBoot.hpp"
