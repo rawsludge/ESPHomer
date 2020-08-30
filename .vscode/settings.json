@@ -8,6 +8,7 @@
         "vector": "cpp",
         "initializer_list": "cpp",
         "regex": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "functional": "cpp"
     }
 }

@@ -1,47 +1,59 @@
 #include "BootConfig.hpp"
-#include "HelperClass.hpp"
+#include "Helpers.hpp"
+#include "UtilsClass.hpp"
 
 using namespace Internals;
 
-BootConfig::BootConfig()
+BootConfig::BootConfig() : 
+    _http(80)
 {
+    Log.notice("Starting config mode" CR);             
     WiFi.disconnect(true);
 }
 
 void BootConfig::setup()
 {
-    char *hostname = Helpers.getID();
+    char hostname[MAX_WIFI_SSID_LENGTH]={0};
+    sprintf(hostname, "%s_%s", "ESPHomer", Helpers::getID());
     Log.notice("SSID:%s" CR, hostname);
     wifi_station_set_hostname(hostname);
     WiFi.hostname(hostname);    
-
-    pinMode(LED_BUILTIN, OUTPUT);
-
-    _ticker.attach_ms(800, []() {
+    
+    _ticker.attach_ms(CONFIG_LED_TIME, []() {
         int status = digitalRead(LED_BUILTIN);
         digitalWrite(LED_BUILTIN, !status);
     });
 
-    _wifiManager.setAPCallback( [&](WiFiManager *wifiM) {
-        Log.notice("Config mode ip: %s, SSID: %s" CR, WiFi.softAPIP().toString().c_str(), wifiM->getConfigPortalSSID().c_str() );        
-    });    
-    _wifiManager.setSaveConfigCallback( [=]() {
-        Log.notice("Config callback called" CR);
+    WiFi.mode(WIFI_AP);
+    WiFi.softAP(hostname);
+    Log.notice("AP IP Address: %s" CR, WiFi.softAPIP().toString().c_str());
 
-    } );
-
-    _wifiManager.setBreakAfterConfig(true);
-    _wifiManager.setConfigPortalTimeout(120);
-    if( !_wifiManager.startConfigPortal( hostname ))
-    {
-        Log.error("Failed to connect and hit timeout" CR);  
-        ESP.reset();
-        delay(1000);
-    }
-    _ticker.detach();
+    ESP8266WebServer *server = &_http;
+    _http.on("/config", HTTP_PUT, [server, ticker=&_ticker](){
+        Log.notice("Configuration begin" CR);
+        if( server->hasArg("plain") )
+        {
+            const char *data = server->arg("plain").c_str();
+            bool result = Utils.Config()->save(data);
+            if( !result ) 
+            {
+                String message = String("{\"success\":false") + String("\"error\":\"") + String(Helpers::getLastError()) + String("\"}");
+                server->send(400, "application/json", message.c_str());
+                return;
+            }
+            server->send(200, "application/json", "{\"success\":true}");
+            Log.notice("Device configured" CR);
+            ticker->detach();
+            ticker->attach_ms(2000, []() { 
+                digitalWrite(LED_BUILTIN, 0);
+                ESP.reset();
+            });
+        }
+    });
+    _http.begin();
 }
 
 void BootConfig::loop()
 {
-
+    _http.handleClient();
 }

@@ -4,7 +4,12 @@
 #include <ArduinoLog.h>
 #include "IBoot.hpp"
 #include "BootConfig.hpp"
+#include "BootNormal.hpp"
+#include "DeviceConfig.hpp"
+#include "UtilsClass.hpp"
 
+
+using namespace Internals;
 
 class ESPHomer
 {
